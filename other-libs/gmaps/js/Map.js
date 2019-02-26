@@ -1,48 +1,51 @@
-import React, { Component } from 'react';
-import GoogleMapReact from 'google-map-react';
-
-const AnyReactComponent = ({ text }) => (
-  <div style={{
-    color: 'white', 
-    background: 'grey',
-    padding: '15px 10px',
-    display: 'inline-flex',
-    textAlign: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '100%',
-    transform: 'translate(-50%, -50%)'
-  }}>
-    {text}
-  </div>
-);
+import {GoogleMap, Marker } from "react-google-maps";
 
 class Map extends React.Component {
-  static defaultProps = {
-    center: {lat: random(-90, 90), lng: random(-180, 180)},
-    zoom: 11
-  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      points: []
+    }
+  }
+
+  componentDidMount() {
+    const myLatLng = { lat: 0, lng: 0 };
+    this.map = new GoogleMap(this.node, {
+      center: myLatLng,
+      zoom: 0
+    });
+  }
+
+  componentWillReceiveProps(newProps) {
+    if (!this.state.points.lenght) {
+      this.state.points.map(office => office.setMap(null))
+    }
+    const points = [];
+    newProps.points.map(office => {
+      const marker = new GoogleMap.Marker(
+        {
+          map: this.map,
+          position: {
+            lat: office.lat,
+            lng: office.lon
+          }
+        }
+      )
+      points.push(marker);
+    })
+    this.setState({ points })
+  }
+
+  componentWillUnmount() {
+    this.map.clear();
+  }
 
   render() {
     return (
-       <GoogleMapReact
-        defaultCenter={this.props.center}
-        defaultZoom={this.props.zoom}
-      >
-        <AnyReactComponent 
-          lat= random(-90, 90) 
-          lng= random(-180, 180) 
-          text={'Main office'} 
-        />
-      </GoogleMapReact>
+      <div ref={node => this.node = node}>
+        map loading...
+      </div>
     );
   }
 }
-
-
-ReactDOM.render(
-  <div style={{width: '100%', height: '400px'}}>
-    <Map/>
-  </div>,
-  document.getElementById('main')
-);
